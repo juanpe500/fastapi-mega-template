@@ -1,0 +1,26 @@
+{% extends "admin/base.html" %}
+{% block title %}Error log — Admin{% endblock %}
+{% block admin %}
+  <h1>Error log</h1>
+  <p>
+    <a href="/admin/errors?show=unresolved" {{ 'style=font-weight:bold' if show == 'unresolved' }}>Unresolved</a> ·
+    <a href="/admin/errors?show=all" {{ 'style=font-weight:bold' if show == 'all' }}>All</a> ·
+    <a href="/admin/errors/export.csv?show={{ show }}">Export CSV</a>
+  </p>
+  {% for e in errors %}
+    <div class="card">
+      <p><strong>{{ e.status_code }}</strong> {{ e.method }} {{ e.path }}
+         <span class="muted">· {{ e.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+         {% if e.resolved %}<span class="ok">· resolved</span>{% endif %}</p>
+      <p>{{ e.message }}</p>
+      <details><summary class="muted">Traceback</summary><pre>{{ e.traceback }}</pre></details>
+      <form action="/admin/errors/{{ e.id }}/resolve" method="post">
+      {{ csrf_field }}
+        <button type="submit">{{ 'Reopen' if e.resolved else 'Mark resolved' }}</button>
+      </form>
+    </div>
+  {% else %}
+    <p class="muted">No errors logged. 🎉</p>
+  {% endfor %}
+  {% with p = page_obj %}{% include "partials/pagination.html" %}{% endwith %}
+{% endblock %}

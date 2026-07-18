@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Invalid request — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>422 — Invalid request</h1>
+  <p>Some fields didn't validate. Please go back and check your input.</p>
+  {% if errors %}
+    <ul class="muted">
+      {% for e in errors %}<li>{{ e.get('loc') | join('.') }}: {{ e.get('msg') }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+{% endblock %}

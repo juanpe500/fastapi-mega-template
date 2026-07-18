@@ -1,0 +1,49 @@
+# --- Web framework ---
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+gunicorn==23.0.0
+python-multipart==0.0.20
+jinja2==3.1.5
+itsdangerous==2.2.0
+
+# --- Config ---
+pydantic==2.10.4
+pydantic-settings==2.7.1
+python-dotenv==1.0.1
+
+# --- Database (async) ---
+sqlalchemy[asyncio]==2.0.36
+alembic==1.14.0
+aiosqlite==0.20.0
+# Postgres driver — used when DATABASE_URL is postgresql+asyncpg://...
+asyncpg==0.30.0
+# Alembic runs migrations synchronously; needs a sync driver too:
+psycopg[binary]==3.2.3
+
+# --- Security / auth ---
+passlib[bcrypt]==1.7.4
+bcrypt==4.2.1
+PyJWT==2.10.1
+pyotp==2.9.0
+cryptography==44.0.0
+
+# --- Optional infra ---
+redis==5.2.1
+
+# --- Object storage (S3 / R2 / MinIO) ---
+boto3==1.35.90
+
+# --- 2FA QR codes (pure-python SVG, no PIL) ---
+segno==1.6.1
+
+# --- Background scheduler ---
+APScheduler==3.11.0
+
+# --- Billing ---
+stripe==11.4.1
+
+# --- Email / http ---
+httpx==0.28.1
+
+# --- Ops (optional) ---
+sentry-sdk[fastapi]==2.19.2

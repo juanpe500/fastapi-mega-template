@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="{{ locale }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ APP_NAME }}{% endblock %}</title>
+
+  {# --- SEO / social cards: override meta_description / meta_image per page --- #}
+  <meta name="description" content="{{ meta_description or SITE_DESCRIPTION }}">
+  <link rel="canonical" href="{{ BASE_URL }}{{ request.url.path }}">
+  <meta property="og:site_name" content="{{ APP_NAME }}">
+  <meta property="og:title" content="{{ meta_title or self.title() }}">
+  <meta property="og:description" content="{{ meta_description or SITE_DESCRIPTION }}">
+  <meta property="og:type" content="{{ meta_type or 'website' }}">
+  <meta property="og:url" content="{{ BASE_URL }}{{ request.url.path }}">
+  {% if meta_image or SITE_IMAGE %}
+    <meta property="og:image" content="{{ meta_image or SITE_IMAGE }}">
+    <meta name="twitter:card" content="summary_large_image">
+  {% else %}
+    <meta name="twitter:card" content="summary">
+  {% endif %}
+
+  <link rel="stylesheet" href="/static/css/app.css?v={{ deploy_version }}">
+
+  {# Analytics load only after consent — see the cookie banner below. #}
+  {% if analytics_enabled and cookies_accepted %}
+    <script defer src="{{ analytics_script_url }}"
+            {% if analytics_site_id %}data-site="{{ analytics_site_id }}"{% endif %}></script>
+  {% endif %}
+
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/"><strong>{{ APP_NAME }}</strong></a>
+      {% if user %}
+        <a href="/account">{{ t("nav.account") }}</a>
+        <a href="/account/billing">{{ t("nav.billing") }}</a>
+        <a href="/account/tickets">{{ t("nav.support") }}</a>
+        <a href="/account/notifications" id="notif-link">
+          {{ t("nav.notifications") }}<span id="notif-count"></span>
+        </a>
+        {% if user.has_role('admin') %}<a href="/admin">{{ t("nav.admin") }}</a>{% endif %}
+        <form action="/logout" method="post" style="display:inline">
+          {{ csrf_field }}
+          <button type="submit">{{ t("nav.logout") }}</button>
+        </form>
+      {% else %}
+        <a href="/login">{{ t("nav.login") }}</a>
+        <a href="/register">{{ t("nav.register") }}</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  {% if impersonator_id %}
+    <div class="card" style="border-color:#b00020">
+      <strong class="error">Impersonating {{ user.email }}</strong>
+      — actions you take are recorded as this user.
+      <form action="/impersonate/stop" method="post" style="display:inline">
+        {{ csrf_field }}
+        <button type="submit">Stop impersonating</button>
+      </form>
+    </div>
+  {% endif %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <p>
+      <a href="/terms">{{ t("footer.terms") }}</a> &middot;
+      <a href="/privacy">{{ t("footer.privacy") }}</a> &middot;
+      <a href="/refunds">{{ t("footer.refunds") }}</a> &middot;
+      <a href="/contact">{{ t("footer.contact") }}</a>
+    </p>
+    {% if available_locales | length > 1 %}
+      <p>
+        {% for code in available_locales %}
+          <a href="/locale/{{ code }}?next={{ request.url.path }}"
+             {% if code == locale %}style="font-weight:bold"{% endif %}>{{ code }}</a>
+          {% if not loop.last %}&middot;{% endif %}
+        {% endfor %}
+      </p>
+    {% endif %}
+    <small>{{ APP_NAME }} &middot; {{ ENV }} &middot; v{{ deploy_version }}</small>
+  </footer>
+
+  {% if cookie_banner_enabled and not request.cookies.get('cookie_consent') %}
+    <div id="cookie-banner" class="card"
+         style="position:fixed;bottom:0;left:0;right:0;margin:0;border-radius:0">
+      <p>{{ t("cookies.message") }} <a href="/privacy">{{ t("footer.privacy") }}</a></p>
+      <button data-consent="all">{{ t("cookies.accept") }}</button>
+      <button data-consent="essential">{{ t("cookies.reject") }}</button>
+    </div>
+  {% endif %}
+
+  <script src="/static/js/app.js?v={{ deploy_version }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

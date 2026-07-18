@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ ticket.subject }} — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <p><a href="/account/tickets">← All tickets</a></p>
+  <h1>{{ ticket.subject }}</h1>
+  <p class="muted">{{ ticket.category }} · status: {{ ticket.status }}</p>
+
+  {% for m in ticket.messages %}
+    <div class="card {{ 'msg-staff' if m.is_staff }}">
+      <p class="muted"><strong>{{ 'Staff' if m.is_staff else 'You' }}</strong>
+         · {{ m.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+      <p style="white-space:pre-wrap">{{ m.body }}</p>
+      {% if m.attachment_url %}
+        <p>📎 <a href="/account/tickets/{{ ticket.id }}/attachments/{{ m.id }}">Attachment</a></p>
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  {% if ticket.status != 'closed' %}
+    <form action="/account/tickets/{{ ticket.id }}/close" method="post">
+      {{ csrf_field }}
+      <button type="submit">Close this ticket</button>
+    </form>
+
+    <h2>Reply</h2>
+    <form action="/account/tickets/{{ ticket.id }}/reply" method="post" enctype="multipart/form-data">
+      {{ csrf_field }}
+      <textarea name="body" rows="4" required></textarea>
+      <label for="attachment">Attachment (optional)</label>
+      <input id="attachment" name="attachment" type="file">
+      <p><button type="submit">Send reply</button></p>
+    </form>
+  {% else %}
+    <p class="muted">This ticket is closed. Replying will reopen it.</p>
+    <form action="/account/tickets/{{ ticket.id }}/reply" method="post" enctype="multipart/form-data">
+      {{ csrf_field }}
+      <textarea name="body" rows="4" required></textarea>
+      <input name="attachment" type="file">
+      <p><button type="submit">Reopen &amp; reply</button></p>
+    </form>
+  {% endif %}
+{% endblock %}

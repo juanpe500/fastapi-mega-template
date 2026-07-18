@@ -1,0 +1,32 @@
+{
+  "nav.account": "Account",
+  "nav.billing": "Billing",
+  "nav.support": "Support",
+  "nav.admin": "Admin",
+  "nav.login": "Log in",
+  "nav.register": "Register",
+  "nav.logout": "Log out",
+  "nav.notifications": "Notifications",
+
+  "auth.login": "Log in",
+  "auth.email": "Email",
+  "auth.password": "Password",
+  "auth.forgot": "Forgot password?",
+  "auth.create_account": "Create an account",
+
+  "account.title": "Your account",
+  "account.sessions": "Active sessions",
+  "account.danger_zone": "Danger zone",
+  "account.export": "Export my data",
+  "account.deactivate": "Deactivate account",
+  "account.delete": "Delete my account",
+
+  "footer.terms": "Terms",
+  "footer.privacy": "Privacy",
+  "footer.refunds": "Refunds",
+  "footer.contact": "Contact",
+
+  "cookies.message": "We use cookies to keep you signed in and to understand how the site is used.",
+  "cookies.accept": "Accept",
+  "cookies.reject": "Reject non-essential"
+}

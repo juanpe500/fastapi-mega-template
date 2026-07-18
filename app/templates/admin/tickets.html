@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+{% block title %}Ticket queue — Admin{% endblock %}
+{% block admin %}
+  <h1>Support queue</h1>
+  {% if request.query_params.get('bulk') %}<p class="ok">Bulk action applied.</p>{% endif %}
+  <p>
+    {% for s in ['open', 'pending', 'closed', 'all'] %}
+      <a href="/admin/tickets?status_filter={{ s }}"
+         {{ 'style=font-weight:bold' if status_filter == s }}>{{ s }}</a>
+      ·
+    {% endfor %}
+    <a href="/admin/tickets/trash">trash</a> ·
+    <a href="/admin/tickets/export.csv?status_filter={{ status_filter or 'all' }}&amp;q={{ q or '' }}">Export CSV</a>
+  </p>
+
+  <form action="/admin/tickets" method="get">
+    <input type="hidden" name="status_filter" value="{{ status_filter or '' }}">
+    <input name="q" value="{{ q or '' }}" placeholder="Search subject">
+    <button type="submit">Search</button>
+  </form>
+
+  <form action="/admin/tickets/bulk" method="post">
+    {{ csrf_field }}
+    <table>
+      <tr><th></th><th>Subject</th><th>Category</th><th>Status</th><th>Last reply</th></tr>
+      {% for t in tickets %}
+        <tr>
+          <td><input type="checkbox" name="ids" value="{{ t.id }}" aria-label="select ticket"></td>
+          <td><a href="/admin/tickets/{{ t.id }}">{{ t.subject }}</a></td>
+          <td>{{ t.category }}</td>
+          <td>{{ t.status }}</td>
+          <td>{{ t.last_reply_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="muted">No tickets.</td></tr>
+      {% endfor %}
+    </table>
+    <p>
+      <label for="action">With selected:</label>
+      <select id="action" name="action">
+        <option value="open">Mark open</option>
+        <option value="pending">Mark pending</option>
+        <option value="closed">Mark closed</option>
+        <option value="delete">Move to trash</option>
+      </select>
+      <button type="submit">Apply</button>
+    </p>
+  </form>
+
+  {% with p = page_obj %}{% include "partials/pagination.html" %}{% endwith %}
+{% endblock %}

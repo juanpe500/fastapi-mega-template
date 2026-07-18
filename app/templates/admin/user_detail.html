@@ -1,0 +1,59 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ target.email }} — Admin{% endblock %}
+{% block admin %}
+  <p><a href="/admin/users">← Users</a></p>
+  <h1>{{ target.email }}</h1>
+  <div class="card">
+    <p><strong>ID:</strong> {{ target.id }}</p>
+    <p><strong>Active:</strong> {{ target.is_active }}</p>
+    <p><strong>Verified:</strong> {{ target.email_verified }}</p>
+    <p><strong>Credits:</strong> {{ target.credits_balance }}</p>
+    <p><strong>Joined:</strong> {{ target.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+  </div>
+
+  <form action="/admin/users/{{ target.id }}/toggle" method="post">
+      {{ csrf_field }}
+    <button type="submit">{{ 'Disable' if target.is_active else 'Enable' }} account</button>
+  </form>
+
+  <h2>Support</h2>
+  <p class="muted">Sign in as this user to reproduce an issue. Recorded in the audit log.</p>
+  <form action="/admin/users/{{ target.id }}/impersonate" method="post">
+    {{ csrf_field }}
+    <button type="submit">Impersonate</button>
+  </form>
+
+  <h2>Roles</h2>
+  <form action="/admin/users/{{ target.id }}/roles" method="post">
+      {{ csrf_field }}
+    {% for r in all_roles %}
+      <label style="display:inline-block; margin-right:1rem">
+        <input type="checkbox" name="roles" value="{{ r.id }}" style="width:auto"
+          {{ 'checked' if r in target.roles }}> {{ r.name }}
+      </label>
+    {% endfor %}
+    <p><button type="submit">Save roles</button></p>
+  </form>
+
+  <h2>Adjust credits</h2>
+  <form action="/admin/users/{{ target.id }}/credits" method="post">
+      {{ csrf_field }}
+    <label for="amount">Amount (negative to debit)</label>
+    <input id="amount" name="amount" value="0">
+    <label for="note">Note</label>
+    <input id="note" name="note">
+    <p><button type="submit">Apply</button></p>
+  </form>
+
+  <h2>Recent credit history</h2>
+  <table>
+    <tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance</th><th>Note</th></tr>
+    {% for tx in history %}
+      <tr>
+        <td>{{ tx.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td>{{ tx.kind }}</td><td>{{ tx.amount }}</td>
+        <td>{{ tx.balance_after }}</td><td>{{ tx.description }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

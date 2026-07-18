@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Account — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Your account</h1>
+  {% if request.query_params.get('changed') %}<p class="ok">Password updated.</p>{% endif %}
+  {% if request.query_params.get('saved') %}<p class="ok">Profile saved.</p>{% endif %}
+  {% if request.query_params.get('email_pending') %}
+    <p class="ok">Check your new inbox for a confirmation link.</p>{% endif %}
+  {% if request.query_params.get('email_error') == 'password' %}
+    <p class="error">Password is incorrect.</p>{% endif %}
+  {% if request.query_params.get('email_error') == 'same' %}
+    <p class="error">That's already your email address.</p>{% endif %}
+  {% if request.query_params.get('delete_error') %}
+    <p class="error">Type DELETE exactly to confirm.</p>{% endif %}
+  {% if request.query_params.get('deletion_cancelled') %}
+    <p class="ok">Account deletion cancelled.</p>{% endif %}
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+  {% if deletion_due_at %}
+    <div class="card">
+      <p class="error"><strong>This account is scheduled for deletion on
+        {{ deletion_due_at.strftime('%Y-%m-%d') }}.</strong></p>
+      <form action="/account/delete/cancel" method="post">
+        {{ csrf_field }}
+        <button type="submit">Cancel deletion</button>
+      </form>
+    </div>
+  {% endif %}
+
+  <div class="card">
+    {% if user.avatar_url %}
+      <p><img src="{{ user.avatar_url }}" alt="avatar" style="max-width:96px;border-radius:50%"></p>
+    {% endif %}
+    <form action="/account/avatar" method="post" enctype="multipart/form-data">
+      {{ csrf_field }}
+      <label for="file">Avatar image</label>
+      <input id="file" name="file" type="file" accept="image/*" required>
+      <button type="submit">Upload avatar</button>
+    </form>
+    {% if request.query_params.get('avatar_error') %}<p class="error">Invalid or too-large image.</p>{% endif %}
+    <p><strong>Email:</strong> {{ user.email }}
+      {% if not user.email_verified %}<small class="muted">(unverified)</small>{% endif %}</p>
+    {% if user.pending_email %}
+      <p class="muted">Pending change to <strong>{{ user.pending_email }}</strong> — confirm from
+        the link we emailed there.</p>
+    {% endif %}
+    <p><strong>Roles:</strong> {{ user.role_names | join(', ') or 'user' }}</p>
+    <p><strong>Credits:</strong> {{ balance }}</p>
+    <p><strong>2FA:</strong> {{ 'Enabled' if user.totp_enabled else 'Disabled' }}
+       (<a href="/account/2fa">manage</a>)</p>
+    {% if subscription and subscription.is_active %}
+      <p><strong>Subscription:</strong> {{ subscription.status }}</p>
+    {% endif %}
+  </div>
+
+  <h2>Profile</h2>
+  <form action="/account/profile" method="post">
+    {{ csrf_field }}
+    <label for="display_name">Display name</label>
+    <input id="display_name" name="display_name" value="{{ user.display_name or '' }}" maxlength="120">
+    {% if LOCALES | length > 1 %}
+      <label for="locale">Language</label>
+      <select id="locale" name="locale">
+        {% for code in LOCALES %}
+          <option value="{{ code }}" {% if user.locale == code %}selected{% endif %}>{{ code }}</option>
+        {% endfor %}
+      </select>
+    {% endif %}
+    <p><button type="submit">Save profile</button></p>
+  </form>
+
+  <h2>Change email</h2>
+  <p class="muted">We email the new address to confirm, and notify the old one.</p>
+  <form action="/account/email" method="post">
+    {{ csrf_field }}
+    <label for="new_email">New email</label>
+    <input id="new_email" name="new_email" type="email" required>
+    <label for="email_password">Current password</label>
+    <input id="email_password" name="password" type="password" required>
+    <p><button type="submit">Send confirmation</button></p>
+  </form>
+
+  <h2>Change password</h2>
+  <form action="/account/password" method="post">
+      {{ csrf_field }}
+    <label for="current_password">Current password</label>
+    <input id="current_password" name="current_password" type="password" required>
+    <label for="new_password">New password</label>
+    <input id="new_password" name="new_password" type="password" minlength="8" required>
+    <p><button type="submit">Update password</button></p>
+  </form>
+
+  <h2>API key</h2>
+  <p class="muted">Generate a key for programmatic access (sent as the <code>X-API-Key</code> header).</p>
+  <form action="/account/api-key" method="post">
+      {{ csrf_field }}
+    <button type="submit">Generate new API key</button>
+  </form>
+
+  {% if REFERRALS_ENABLED and referral_link %}
+    <h2>Refer a friend</h2>
+    <div class="card">
+      <p>Share your link: <code>{{ referral_link }}</code></p>
+      <p class="muted">{{ referral_count }} signup(s) referred so far.</p>
+    </div>
+  {% endif %}
+
+  <h2>Danger zone</h2>
+  <div class="card">
+    <h3>Export your data</h3>
+    <p class="muted">Downloads everything we store about you as JSON.</p>
+    <p><a href="/account/export">Download my data</a></p>
+
+    <h3>Deactivate</h3>
+    <p class="muted">Hides your account and signs you out everywhere. Signing back in restores it.</p>
+    <form action="/account/deactivate" method="post">
+      {{ csrf_field }}
+      <button type="submit">Deactivate account</button>
+    </form>
+
+    <h3>Delete permanently</h3>
+    <p class="muted">Deleted after {{ ACCOUNT_DELETION_GRACE_DAYS }} days. Sign in before then to
+      cancel. Type <code>DELETE</code> to confirm.</p>
+    <form action="/account/delete" method="post">
+      {{ csrf_field }}
+      <label for="confirm">Confirmation</label>
+      <input id="confirm" name="confirm" placeholder="DELETE" required>
+      <p><button type="submit">Delete my account</button></p>
+    </form>
+  </div>
+
+  <p style="margin-top:2rem"><a href="/account/billing">Billing &amp; credits →</a>
+     &middot; <a href="/account/tickets">Support tickets →</a>
+     &middot; <a href="/account/sessions">Active sessions →</a>
+     &middot; <a href="/account/notifications">Notifications →</a></p>
+{% endblock %}

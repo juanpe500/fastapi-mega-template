@@ -1,0 +1,8 @@
+{% extends "emails/base_email.html" %}
+{% block heading %}Confirm your email{% endblock %}
+{% block content %}
+  <p>Welcome to {{ APP_NAME }}. Confirm your email address to activate your account.</p>
+  <p><a href="{{ link }}" style="background:#222;color:#fff;padding:10px 18px;
+        border-radius:4px;text-decoration:none;display:inline-block">Verify email</a></p>
+  <p style="font-size:12px;color:#777">Or paste this link into your browser:<br>{{ link }}</p>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "admin/base.html" %}
+{% block title %}Settings — Admin{% endblock %}
+{% block admin %}
+  <h1>Settings &amp; feature flags</h1>
+  <p class="muted">Values you can change without a redeploy. Secrets belong in <code>.env</code>.</p>
+
+  <h2>Maintenance mode</h2>
+  <div class="card">
+    <p>Status:
+      {% if maintenance %}<strong class="error">ON</strong> — visitors see the maintenance page.
+      {% else %}<strong class="ok">off</strong> — the site is live.{% endif %}
+    </p>
+    <p class="muted">Admins keep full access either way, so you can always switch it back.</p>
+    <form action="/admin/settings/maintenance" method="post">
+      {{ csrf_field }}
+      <input type="hidden" name="enabled" value="{{ '0' if maintenance else '1' }}">
+      <button type="submit">{{ 'Bring the site back' if maintenance else 'Enable maintenance mode' }}</button>
+    </form>
+  </div>
+
+  <h2>All settings</h2>
+  <table>
+    <tr><th>Key</th><th>Value</th><th>Type</th><th>Description</th><th></th></tr>
+    {% for s in settings_rows %}
+      <tr>
+        <td><code>{{ s.key }}</code></td>
+        <td>{{ s.value }}</td>
+        <td>{{ s.value_type }}</td>
+        <td class="muted">{{ s.description }}</td>
+        <td>
+          <form action="/admin/settings/{{ s.key }}/delete" method="post">
+            {{ csrf_field }}
+            <button type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted">No settings defined yet.</td></tr>
+    {% endfor %}
+  </table>
+
+  <h2>Add / update setting</h2>
+  <p class="muted">Using an existing key updates it.</p>
+  <form action="/admin/settings" method="post">
+    {{ csrf_field }}
+    <label for="key">Key</label>
+    <input id="key" name="key" required placeholder="e.g. signups_paused">
+    <label for="value">Value</label>
+    <input id="value" name="value">
+    <label for="value_type">Type</label>
+    <select id="value_type" name="value_type" style="width:auto">
+      <option value="str">str</option>
+      <option value="bool">bool</option>
+      <option value="int">int</option>
+      <option value="float">float</option>
+      <option value="json">json</option>
+    </select>
+    <label for="description">Description</label>
+    <input id="description" name="description">
+    <p><button type="submit">Save setting</button></p>
+  </form>
+{% endblock %}

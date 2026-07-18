@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Unsubscribe — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Unsubscribe</h1>
+  {% if ok %}
+    <p class="ok">You're unsubscribed from <strong>{{ label }}</strong> emails.</p>
+    <p class="muted">You'll still receive account-critical messages (security and billing).</p>
+  {% else %}
+    <p class="error">That unsubscribe link is invalid or has expired.</p>
+    <p class="muted">Manage your preferences from your account instead.</p>
+  {% endif %}
+  <p><a href="/account/notifications">Notification settings</a> &middot; <a href="/">Home</a></p>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Contact — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Contact us</h1>
+  <p>The fastest way to reach us is through a support ticket
+     {% if user %}(<a href="/account/tickets">open one here</a>){% else %}
+     (<a href="/login">log in</a> to open one){% endif %}.</p>
+  <p class="muted">Or email: {{ support_email }}</p>
+{% endblock %}

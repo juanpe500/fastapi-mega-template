@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Refund Policy — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Refund &amp; Cancellation Policy</h1>
+  <p class="muted">Last updated: {{ last_updated }}</p>
+
+  <p><strong>Placeholder copy — replace with your real policy before launch.</strong></p>
+
+  <h2>Subscriptions</h2>
+  <p>You can cancel any time from your <a href="/account/billing">billing page</a>. Access continues
+     until the end of the current billing period; we don't prorate partial periods unless required by law.</p>
+
+  <h2>Credit purchases</h2>
+  <p>One-time credit purchases are generally non-refundable once credits are used.
+     Contact us for issues with a charge.</p>
+
+  <h2>Disputes</h2>
+  <p>If you believe a charge is in error, <a href="/contact">contact us</a> before opening a dispute so we can help quickly.</p>
+{% endblock %}

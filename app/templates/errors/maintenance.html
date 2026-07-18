@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Down for maintenance — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Down for maintenance</h1>
+  <p>{{ message or "We're making some changes and will be back shortly. Thanks for your patience." }}</p>
+  <p class="muted">Check <a href="/status">the status page</a> for updates, or
+     <a href="/login">sign in</a> if you're an administrator.</p>
+{% endblock %}

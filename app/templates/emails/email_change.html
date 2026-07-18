@@ -1,0 +1,11 @@
+{% extends "emails/base_email.html" %}
+{% block heading %}Confirm your new email address{% endblock %}
+{% block content %}
+  <p>You asked to change your {{ APP_NAME }} email address to <strong>{{ new_email }}</strong>.</p>
+  <p><a href="{{ link }}" style="background:#222;color:#fff;padding:10px 18px;
+        border-radius:4px;text-decoration:none;display:inline-block">Confirm this address</a></p>
+  <p style="font-size:12px;color:#777">
+    This link expires in 24 hours. If you didn't request the change, ignore this email —
+    your address stays as it is.
+  </p>
+{% endblock %}

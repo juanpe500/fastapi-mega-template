@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+  <nav style="display:flex; gap:1rem; flex-wrap:wrap; padding-bottom:0.5rem; border-bottom:1px solid #8884; margin-bottom:1rem">
+    <a href="/admin">Dashboard</a>
+    <a href="/admin/users">Users</a>
+    <a href="/admin/roles">Roles</a>
+    <a href="/admin/billing">Billing</a>
+    <a href="/admin/tickets">Tickets</a>
+    <a href="/admin/tickets/trash">Trash</a>
+    <a href="/admin/errors">Errors</a>
+    <a href="/admin/audit">Audit</a>
+    <a href="/admin/settings">Settings</a>
+    <a href="/status">Status</a>
+  </nav>
+  {% block admin %}{% endblock %}
+{% endblock %}

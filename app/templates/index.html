@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ APP_NAME }} — Home{% endblock %}
+{% block content %}
+  <h1>{{ APP_NAME }}</h1>
+  <p class="muted">FastAPI mega-template. This is a placeholder home page.</p>
+  {% if user %}
+    <p>Signed in as <strong>{{ user.email }}</strong>.</p>
+    <p><a href="/account">Go to your account →</a></p>
+  {% else %}
+    <p><a href="/login">Log in</a> or <a href="/register">create an account</a> to get started.</p>
+  {% endif %}
+{% endblock %}

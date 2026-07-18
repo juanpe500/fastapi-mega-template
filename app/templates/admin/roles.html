@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+{% block title %}Roles — Admin{% endblock %}
+{% block admin %}
+  <h1>Roles &amp; permissions</h1>
+
+  {% for r in roles %}
+    <div class="card">
+      <h2>{{ r.name }} {% if r.is_system %}<small class="muted">(system)</small>{% endif %}</h2>
+      <p class="muted">{{ r.description }}</p>
+      <form action="/admin/roles/{{ r.id }}/permissions" method="post">
+      {{ csrf_field }}
+        {% for p in permissions %}
+          <label style="display:inline-block; margin-right:1rem">
+            <input type="checkbox" name="permissions" value="{{ p.id }}" style="width:auto"
+              {{ 'checked' if p in r.permissions }}> {{ p.name }}
+          </label>
+        {% endfor %}
+        <p><button type="submit">Save permissions</button></p>
+      </form>
+      {% if not r.is_system %}
+        <form action="/admin/roles/{{ r.id }}/delete" method="post">
+      {{ csrf_field }}
+          <button type="submit">Delete role</button>
+        </form>
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  <h2>Create role</h2>
+  <form action="/admin/roles" method="post">
+      {{ csrf_field }}
+    <label for="name">Name</label>
+    <input id="name" name="name" required>
+    <label for="description">Description</label>
+    <input id="description" name="description">
+    <p><button type="submit">Create</button></p>
+  </form>
+{% endblock %}

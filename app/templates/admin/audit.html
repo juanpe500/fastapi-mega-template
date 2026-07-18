@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+{% block title %}Audit log — Admin{% endblock %}
+{% block admin %}
+  <h1>Audit log</h1>
+  <form action="/admin/audit" method="get">
+    <input name="action" value="{{ action or '' }}" placeholder="Filter by action, e.g. user.login">
+    <input name="q" value="{{ q or '' }}" placeholder="Search detail">
+    <button type="submit">Filter</button>
+    {% if action or q %}<a href="/admin/audit">clear</a>{% endif %}
+    <a href="/admin/audit/export.csv?action={{ action or '' }}&amp;q={{ q or '' }}">Export CSV</a>
+  </form>
+  <table>
+    <tr><th>When</th><th>Action</th><th>Actor</th><th>Target</th><th>IP</th><th>Detail</th></tr>
+    {% for e in entries %}
+      <tr>
+        <td>{{ e.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td>{{ e.action }}</td>
+        <td>{{ actors.get(e.actor_id, '—') }}</td>
+        <td>{% if e.target_id %}{{ e.target_type }}:{{ e.target_id[:8] }}…{% else %}—{% endif %}</td>
+        <td>{{ e.ip_address or '—' }}</td>
+        <td>{{ e.detail }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted">No audit entries.</td></tr>
+    {% endfor %}
+  </table>
+  {% with p = page_obj %}{% include "partials/pagination.html" %}{% endwith %}
+{% endblock %}

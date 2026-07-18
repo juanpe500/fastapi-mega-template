@@ -1,0 +1,39 @@
+# Env / secrets
+.env
+*.env
+!.env.example
+
+# Databases
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Logs / runtime
+logs/
+*.log
+
+# Uploads (local storage backend)
+uploads/
+private_uploads/
+app/static/uploads/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

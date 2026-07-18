@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ ticket.subject }} — Admin{% endblock %}
+{% block admin %}
+  <p><a href="/admin/tickets">← Queue</a></p>
+  <h1>{{ ticket.subject }}</h1>
+  <p class="muted">From: {{ owner.email if owner else ticket.user_id }} · {{ ticket.category }} · {{ ticket.status }}</p>
+
+  {% for m in ticket.messages %}
+    <div class="card {{ 'msg-staff' if m.is_staff }}">
+      <p class="muted"><strong>{{ 'Staff' if m.is_staff else 'User' }}</strong>
+         · {{ m.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+      <p style="white-space:pre-wrap">{{ m.body }}</p>
+      {% if m.attachment_url %}
+        <p>📎 <a href="/admin/tickets/{{ ticket.id }}/attachments/{{ m.id }}">Attachment</a></p>
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  <h2>Reply</h2>
+  <form action="/admin/tickets/{{ ticket.id }}/reply" method="post">
+      {{ csrf_field }}
+    <textarea name="body" rows="4" required></textarea>
+    <p><button type="submit">Send staff reply</button></p>
+  </form>
+
+  <form action="/admin/tickets/{{ ticket.id }}/status" method="post">
+      {{ csrf_field }}
+    <select name="new_status" style="width:auto">
+      <option value="open">open</option>
+      <option value="pending">pending</option>
+      <option value="closed">closed</option>
+    </select>
+    <button type="submit">Set status</button>
+  </form>
+
+  {% if ticket.deleted_at %}
+    <p class="muted">In trash since {{ ticket.deleted_at.strftime('%Y-%m-%d %H:%M') }}.</p>
+    <form action="/admin/tickets/{{ ticket.id }}/restore" method="post">
+      {{ csrf_field }}
+      <button type="submit">Restore from trash</button>
+    </form>
+  {% else %}
+    <form action="/admin/tickets/{{ ticket.id }}/delete" method="post">
+      {{ csrf_field }}
+      <button type="submit">Move to trash</button>
+    </form>
+  {% endif %}
+{% endblock %}

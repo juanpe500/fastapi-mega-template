@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Active sessions — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Active sessions</h1>
+  <p class="muted">Devices currently signed in to your account.</p>
+
+  <table>
+    <tr><th>Device</th><th>IP</th><th>Last active</th><th>Signed in</th><th></th></tr>
+    {% for s in sessions %}
+      <tr>
+        <td>
+          {{ (s.user_agent or 'Unknown device')[:70] }}
+          {% if s.id == current_sid %}<strong>(this device)</strong>{% endif %}
+          {% if s.impersonator_id %}<span class="error">(admin session)</span>{% endif %}
+        </td>
+        <td>{{ s.ip_address or '—' }}</td>
+        <td>{{ s.last_active_at.strftime('%Y-%m-%d %H:%M') if s.last_active_at else '—' }}</td>
+        <td>{{ s.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td>
+          <form action="/account/sessions/{{ s.id }}/revoke" method="post">
+            {{ csrf_field }}
+            <button type="submit">{{ 'Sign out' if s.id == current_sid else 'Revoke' }}</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Sign out everywhere</h2>
+  <p class="muted">Revokes every other session but keeps you signed in here.</p>
+  <form action="/account/sessions/revoke-all" method="post">
+    {{ csrf_field }}
+    <button type="submit">Sign out all other devices</button>
+  </form>
+
+  <p><a href="/account">← Back to account</a></p>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "emails/base_email.html" %}
+{% block heading %}Reset your password{% endblock %}
+{% block content %}
+  <p>We received a request to reset your {{ APP_NAME }} password.</p>
+  <p><a href="{{ link }}" style="background:#222;color:#fff;padding:10px 18px;
+        border-radius:4px;text-decoration:none;display:inline-block">Set a new password</a></p>
+  <p style="font-size:12px;color:#777">
+    This link expires in one hour. If you didn't request it, you can ignore this email.
+  </p>
+{% endblock %}

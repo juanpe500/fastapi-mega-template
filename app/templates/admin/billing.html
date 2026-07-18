@@ -1,0 +1,70 @@
+{% extends "admin/base.html" %}
+{% block title %}Billing — Admin{% endblock %}
+{% block admin %}
+  <h1>Plans &amp; subscriptions</h1>
+
+  <h2>Plans</h2>
+  <table>
+    <tr><th>Code</th><th>Name</th><th>Kind</th><th>Price</th><th>Interval</th>
+        <th>Stripe price</th><th>Credits</th><th>Status</th><th></th></tr>
+    {% for p in plans %}
+      <tr>
+        <td>{{ p.code }}</td><td>{{ p.name }}</td><td>{{ p.kind }}</td>
+        <td>{{ '%.2f'|format(p.price_cents / 100) }} {{ p.currency|upper }}</td>
+        <td>{{ p.interval or '—' }}</td>
+        <td><small>{{ p.stripe_price_id or '—' }}</small></td>
+        <td>{{ p.credits_granted }}</td>
+        <td>{{ 'live' if p.is_active else 'retired' }}</td>
+        <td>
+          <form action="/admin/billing/plans/{{ p.id }}/toggle" method="post">
+            {{ csrf_field }}
+            <button type="submit">{{ 'Retire' if p.is_active else 'Re-list' }}</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Add / update plan</h2>
+  <p class="muted">Using an existing code updates that plan.</p>
+  <form action="/admin/billing/plans" method="post">
+      {{ csrf_field }}
+    <label for="code">Code</label><input id="code" name="code" required>
+    <label for="name">Name</label><input id="name" name="name" required>
+    <label for="kind">Kind</label>
+    <select id="kind" name="kind" style="width:auto">
+      <option value="subscription">subscription</option>
+      <option value="credit">credit</option>
+    </select>
+    <label for="price_cents">Price (cents)</label><input id="price_cents" name="price_cents" value="0">
+    <label for="interval">Interval (month/year, blank for one-time)</label><input id="interval" name="interval">
+    <label for="stripe_price_id">Stripe price id</label><input id="stripe_price_id" name="stripe_price_id">
+    <label for="credits_granted">Credits granted (credit packs)</label>
+    <input id="credits_granted" name="credits_granted" value="0">
+    <p><button type="submit">Save plan</button></p>
+  </form>
+
+  <h2>Subscriptions</h2>
+  <form action="/admin/billing" method="get">
+    <select name="status_filter">
+      <option value="">All statuses</option>
+      {% for s in ['active', 'trialing', 'past_due', 'unpaid', 'canceled'] %}
+        <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Filter</button>
+    <a href="/admin/billing/subscriptions.csv?status_filter={{ status_filter or '' }}">Export CSV</a>
+  </form>
+  <table>
+    <tr><th>User</th><th>Status</th><th>Plan</th><th>Period end</th></tr>
+    {% for s in subs %}
+      <tr>
+        <td><a href="/admin/users/{{ s.user_id }}">{{ s.user_id[:8] }}…</a></td>
+        <td>{{ s.status }}</td>
+        <td>{{ s.plan.name if s.plan else '—' }}</td>
+        <td>{{ s.current_period_end.strftime('%Y-%m-%d') if s.current_period_end else '—' }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+  {% with p = page_obj %}{% include "partials/pagination.html" %}{% endwith %}
+{% endblock %}

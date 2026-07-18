@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Updated terms — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>We've updated our terms</h1>
+  <p>Please review and accept the current
+     <a href="/terms" target="_blank">Terms of Service</a> and
+     <a href="/privacy" target="_blank">Privacy Policy</a> to continue using {{ APP_NAME }}.</p>
+
+  <form action="/terms/accept" method="post">
+    {{ csrf_field }}
+    <input type="hidden" name="next" value="{{ next }}">
+    <p>
+      <input id="agree" type="checkbox" required>
+      <label for="agree">I have read and agree to the Terms of Service and Privacy Policy.</label>
+    </p>
+    <p><button type="submit">Accept and continue</button></p>
+  </form>
+
+  <p class="muted"><a href="/logout">Sign out instead</a></p>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends "emails/base_email.html" %}
+{% block heading %}New reply on your ticket{% endblock %}
+{% block content %}
+  <p>There's a new reply on your support ticket: <strong>{{ subject }}</strong></p>
+  <p><a href="{{ link }}" style="background:#222;color:#fff;padding:10px 18px;
+        border-radius:4px;text-decoration:none;display:inline-block">View ticket</a></p>
+{% endblock %}

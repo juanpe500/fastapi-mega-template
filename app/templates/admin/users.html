@@ -1,0 +1,57 @@
+{% extends "admin/base.html" %}
+{% block title %}Users — Admin{% endblock %}
+{% block admin %}
+  <h1>Users</h1>
+  {% if request.query_params.get('bulk') %}<p class="ok">Bulk action applied.</p>{% endif %}
+
+  <form action="/admin/users" method="get">
+    <input name="q" value="{{ q or '' }}" placeholder="Search email or name">
+    <select name="status_filter">
+      <option value="">All</option>
+      {% for value, label in [('active', 'Active'), ('inactive', 'Inactive'),
+                              ('unverified', 'Unverified'), ('deleting', 'Pending deletion')] %}
+        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <input type="hidden" name="sort" value="{{ sort }}">
+    <button type="submit">Search</button>
+    <a href="/admin/users/export.csv?q={{ q or '' }}&amp;status_filter={{ status_filter or '' }}">Export CSV</a>
+  </form>
+
+  <form action="/admin/users/bulk" method="post">
+    {{ csrf_field }}
+    <table>
+      <tr>
+        <th></th>
+        <th><a href="?q={{ q or '' }}&amp;status_filter={{ status_filter or '' }}&amp;sort={{ '-email' if sort == 'email' else 'email' }}">Email</a></th>
+        <th>Roles</th>
+        <th>Active</th>
+        <th>Credits</th>
+        <th><a href="?q={{ q or '' }}&amp;status_filter={{ status_filter or '' }}&amp;sort={{ '-created_at' if sort == 'created_at' else 'created_at' }}">Joined</a></th>
+      </tr>
+      {% for u in users %}
+        <tr>
+          <td><input type="checkbox" name="ids" value="{{ u.id }}" aria-label="select {{ u.email }}"></td>
+          <td><a href="/admin/users/{{ u.id }}">{{ u.email }}</a>
+            {% if u.deletion_requested_at %}<br><small class="error">pending deletion</small>{% endif %}</td>
+          <td>{{ u.role_names | join(', ') }}</td>
+          <td>{{ 'yes' if u.is_active else 'no' }}</td>
+          <td>{{ u.credits_balance }}</td>
+          <td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+
+    <p>
+      <label for="action">With selected:</label>
+      <select id="action" name="action">
+        <option value="activate">Activate</option>
+        <option value="deactivate">Deactivate</option>
+        <option value="verify">Mark email verified</option>
+      </select>
+      <button type="submit">Apply</button>
+    </p>
+  </form>
+
+  {% with p = page_obj %}{% include "partials/pagination.html" %}{% endwith %}
+{% endblock %}

@@ -1,0 +1,18 @@
+{# Reusable pager. Usage: {% with p = page_obj %}{% include "partials/pagination.html" %}{% endwith %}
+   Keeps every existing query param (filters, sort) and only swaps `page`. #}
+{% set p = p or page_obj %}
+{% if p and p.pages > 1 %}
+  {% set qp = request.query_params %}
+  {% set base = [] %}
+  {% for k, v in qp.multi_items() %}{% if k != 'page' %}
+    {% set _ = base.append(k ~ '=' ~ v) %}
+  {% endif %}{% endfor %}
+  {% set prefix = request.url.path ~ '?' ~ (base | join('&')) ~ ('&' if base else '') %}
+  <p class="muted">
+    {% if p.has_prev %}<a href="{{ prefix }}page={{ p.page - 1 }}">← Prev</a>{% else %}<span>← Prev</span>{% endif %}
+    &nbsp; Page {{ p.page }} of {{ p.pages }} ({{ p.start }}–{{ p.end }} of {{ p.total }})
+    &nbsp; {% if p.has_next %}<a href="{{ prefix }}page={{ p.page + 1 }}">Next →</a>{% else %}<span>Next →</span>{% endif %}
+  </p>
+{% elif p %}
+  <p class="muted">{{ p.total }} result(s).</p>
+{% endif %}

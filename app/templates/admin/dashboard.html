@@ -1,0 +1,11 @@
+{% extends "admin/base.html" %}
+{% block title %}Admin — {{ APP_NAME }}{% endblock %}
+{% block admin %}
+  <h1>Admin dashboard</h1>
+  <div style="display:flex; gap:1rem; flex-wrap:wrap">
+    <div class="card"><h2>{{ stats.users }}</h2><p class="muted">Users</p></div>
+    <div class="card"><h2>{{ stats.active_subs }}</h2><p class="muted">Active subscriptions</p></div>
+    <div class="card"><h2>{{ stats.open_tickets }}</h2><p class="muted">Open tickets</p></div>
+    <div class="card"><h2>{{ stats.unresolved_errors }}</h2><p class="muted">Unresolved errors</p></div>
+  </div>
+{% endblock %}

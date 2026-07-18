@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Log in — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Log in</h1>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form action="/login" method="post">
+      {{ csrf_field }}
+    <input type="hidden" name="next" value="{{ next or '' }}">
+    {% if needs_totp %}
+      <p>Enter the 6-digit code from your authenticator app (or one of your recovery codes).</p>
+      <input type="hidden" name="email" value="{{ email }}">
+      <input type="hidden" name="password" value="{{ password }}">
+      <label for="totp_code">Authentication code</label>
+      <input id="totp_code" name="totp_code" inputmode="numeric" autocomplete="one-time-code" autofocus>
+    {% else %}
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" value="{{ email or '' }}" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required>
+    {% endif %}
+      {% if turnstile_enabled %}
+        <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+      {% endif %}
+    <p><button type="submit">Log in</button></p>
+  </form>
+  {% if any_oauth_enabled %}
+    <h2>Or continue with</h2>
+    <p>
+      {% for name, enabled in oauth_providers.items() %}
+        {% if enabled %}
+          <a href="/auth/{{ name }}/login?next={{ next or '' }}">{{ name | capitalize }}</a>
+          {% if not loop.last %}&middot;{% endif %}
+        {% endif %}
+      {% endfor %}
+    </p>
+  {% endif %}
+
+  <p class="muted">
+    <a href="/forgot">Forgot password?</a> &middot;
+    <a href="/register">Create an account</a> &middot;
+    <a href="/verify/resend">Resend verification</a>
+  </p>
+{% endblock %}

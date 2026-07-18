@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}API key — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Your new API key</h1>
+  <p class="error">Copy it now — it won't be shown again.</p>
+  <pre>{{ api_key }}</pre>
+  <p class="muted">Send it as the <code>X-API-Key</code> header. Generating a new key revokes the old one.</p>
+  <p><a href="/account">← Back to account</a></p>
+{% endblock %}

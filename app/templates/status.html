@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Status — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>System status</h1>
+  {% if all_ok %}
+    <p class="ok">All systems operational.</p>
+  {% else %}
+    <p class="error">Some systems are degraded — we're on it.</p>
+  {% endif %}
+
+  <table>
+    <tr><th>Component</th><th>Status</th></tr>
+    {% for name, state in checks.items() %}
+      <tr>
+        <td>{{ name }}</td>
+        <td class="{{ 'ok' if state == 'operational' else 'error' }}">{{ state }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <p class="muted">Version {{ deploy_version }} &middot; environment {{ ENV }}</p>
+  <p><a href="/contact">Report a problem</a></p>
+{% endblock %}

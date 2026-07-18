@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Set a new password — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Set a new password</h1>
+  {% if done %}
+    <p class="ok">Your password has been updated. <a href="/login">Log in</a></p>
+  {% else %}
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <form action="/reset" method="post">
+      {{ csrf_field }}
+      <input type="hidden" name="token" value="{{ token or '' }}">
+      <label for="password">New password</label>
+      <input id="password" name="password" type="password" minlength="8" required autofocus>
+      <p><button type="submit">Update password</button></p>
+    </form>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% block title %}Trash — Admin{% endblock %}
+{% block admin %}
+  <h1>Trash</h1>
+  <p class="muted">Soft-deleted tickets. Nothing here is gone until you purge it.</p>
+  {% if request.query_params.get('bulk') %}<p class="ok">Bulk action applied.</p>{% endif %}
+  <p><a href="/admin/tickets">← Back to queue</a></p>
+
+  <form action="/admin/tickets/bulk" method="post">
+    {{ csrf_field }}
+    <table>
+      <tr><th></th><th>Subject</th><th>Status</th><th>Deleted</th><th></th></tr>
+      {% for t in tickets %}
+        <tr>
+          <td><input type="checkbox" name="ids" value="{{ t.id }}" aria-label="select ticket"></td>
+          <td><a href="/admin/tickets/{{ t.id }}">{{ t.subject }}</a></td>
+          <td>{{ t.status }}</td>
+          <td>{{ t.deleted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td><a href="/admin/tickets/{{ t.id }}">open</a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="muted">Trash is empty.</td></tr>
+      {% endfor %}
+    </table>
+    <p>
+      <input type="hidden" name="action" value="restore">
+      <button type="submit">Restore selected</button>
+    </p>
+  </form>
+
+  {% with p = page_obj %}{% include "partials/pagination.html" %}{% endwith %}
+{% endblock %}

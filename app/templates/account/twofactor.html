@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Two-factor auth — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Two-factor authentication</h1>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+  {% if recovery_codes %}
+    <div class="card">
+      <h2 class="ok">{{ 'New recovery codes' if regenerated else '2FA enabled' }}</h2>
+      <p class="error">Save these now — they are shown only once. Each code works a single time.</p>
+      <pre>{% for c in recovery_codes %}{{ c }}
+{% endfor %}</pre>
+      <p class="muted">Use one in place of your 6-digit code if you lose your authenticator.</p>
+    </div>
+  {% endif %}
+
+  {% if enabled %}
+    {% if not recovery_codes %}
+      <p class="ok">2FA is enabled on your account.</p>
+      <p class="muted">Unused recovery codes remaining: {{ remaining_codes }}</p>
+    {% endif %}
+
+    <form action="/account/2fa/recovery-codes" method="post">
+      {{ csrf_field }}
+      <button type="submit">Regenerate recovery codes</button>
+    </form>
+    <form action="/account/2fa/disable" method="post" style="margin-top:1rem">
+      {{ csrf_field }}
+      <button type="submit">Disable 2FA</button>
+    </form>
+  {% else %}
+    <p>Scan this QR code with your authenticator app (Google Authenticator, Authy, 1Password…):</p>
+    <div>{{ qr_svg | safe }}</div>
+    <p class="muted">Can't scan? Enter this secret manually:</p>
+    <pre>{{ secret }}</pre>
+    <form action="/account/2fa/enable" method="post">
+      {{ csrf_field }}
+      <label for="code">Enter the current 6-digit code to confirm</label>
+      <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" required autofocus>
+      <p><button type="submit">Enable 2FA</button></p>
+    </form>
+  {% endif %}
+  <p><a href="/account">← Back to account</a></p>
+{% endblock %}

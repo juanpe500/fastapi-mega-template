@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Notifications — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Notifications</h1>
+  {% if request.query_params.get('saved') %}<p class="ok">Preferences saved.</p>{% endif %}
+
+  <form action="/account/notifications/read-all" method="post">
+    {{ csrf_field }}
+    <button type="submit">Mark all as read</button>
+  </form>
+
+  {% if page_obj.items %}
+    <table>
+      <tr><th>When</th><th>Kind</th><th>Message</th><th></th></tr>
+      {% for n in page_obj.items %}
+        <tr{% if not n.read_at %} class="unread"{% endif %}>
+          <td>{{ n.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td>{{ kinds.get(n.kind, [n.kind])[0] }}</td>
+          <td>
+            <strong>{{ n.title }}</strong>
+            {% if n.body %}<br><small class="muted">{{ n.body }}</small>{% endif %}
+          </td>
+          <td>
+            {% if not n.read_at %}
+              <form action="/account/notifications/{{ n.id }}/read" method="post">
+                {{ csrf_field }}
+                <button type="submit">{{ 'Open' if n.link else 'Mark read' }}</button>
+              </form>
+            {% elif n.link %}
+              <a href="{{ n.link }}">Open</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+    {% with p = page_obj %}{% include "partials/pagination.html" %}{% endwith %}
+  {% else %}
+    <p class="muted">Nothing here yet.</p>
+  {% endif %}
+
+  <h2>Email preferences</h2>
+  <p class="muted">Transactional emails (security, billing) can't be turned off.</p>
+  <form action="/account/notifications/preferences" method="post">
+    {{ csrf_field }}
+    {% for kind, meta in kinds.items() %}
+      <p>
+        {% if meta[1] %}
+          <input type="checkbox" checked disabled> {{ meta[0] }}
+          <small class="muted">(always sent)</small>
+        {% else %}
+          <input id="email_{{ kind }}" name="email_{{ kind }}" type="checkbox"
+                 {% if prefs.get(kind, True) %}checked{% endif %}>
+          <label for="email_{{ kind }}">{{ meta[0] }}</label>
+        {% endif %}
+      </p>
+    {% endfor %}
+    <p><button type="submit">Save preferences</button></p>
+  </form>
+
+  <p><a href="/account">← Back to your account</a></p>
+{% endblock %}

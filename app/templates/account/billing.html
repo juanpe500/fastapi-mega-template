@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Billing — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Billing &amp; credits</h1>
+  {% if request.query_params.get('success') %}<p class="ok">Payment successful — thank you!</p>{% endif %}
+  {% if request.query_params.get('canceled') %}<p class="muted">Checkout canceled.</p>{% endif %}
+  {% if request.query_params.get('saved') %}<p class="ok">Billing details saved.</p>{% endif %}
+
+  <div class="card">
+    <p><strong>Credit balance:</strong> {{ balance }}</p>
+    {% if subscription and subscription.is_active %}
+      <p><strong>Subscription:</strong> {{ subscription.status }}
+        {% if subscription.plan %}({{ subscription.plan.name }}){% endif %}
+        {% if subscription.current_period_end %}
+          — renews {{ subscription.current_period_end.strftime('%Y-%m-%d') }}{% endif %}
+      </p>
+      <form action="/billing/portal" method="post">
+      {{ csrf_field }}
+        <button type="submit">Manage subscription</button>
+      </form>
+    {% endif %}
+  </div>
+
+  {% if not stripe_enabled %}
+    <p class="muted">Stripe isn't configured — set STRIPE_* in .env to enable checkout.</p>
+  {% endif %}
+
+  <h2>Plans</h2>
+  {% if plans %}
+    <table>
+      <tr><th>Plan</th><th>Type</th><th>Price</th><th></th></tr>
+      {% for p in plans %}
+        <tr>
+          <td>{{ p.name }}<br><small class="muted">{{ p.description }}</small></td>
+          <td>{{ p.kind }}{% if p.interval %} / {{ p.interval }}{% endif %}</td>
+          <td>{{ '%.2f'|format(p.price_cents / 100) }} {{ p.currency|upper }}
+            {% if p.kind == 'credit' %}<br><small>+{{ p.credits_granted }} credits</small>{% endif %}
+          </td>
+          <td>
+            {% if stripe_enabled and p.stripe_price_id %}
+              <form action="/billing/checkout/{{ p.code }}" method="post">
+      {{ csrf_field }}
+                <button type="submit">Buy</button>
+              </form>
+            {% else %}<span class="muted">—</span>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class="muted">No plans configured yet. Add them in the admin panel (/admin/billing).</p>
+  {% endif %}
+
+  <h2>Billing details</h2>
+  <p class="muted">Printed on your receipts and used for tax calculation at checkout.</p>
+  {% set bp = billing_profile %}
+  <form action="/account/billing/profile" method="post">
+    {{ csrf_field }}
+    <label for="company_name">Company (optional)</label>
+    <input id="company_name" name="company_name" value="{{ bp.company_name if bp else '' }}">
+    <label for="tax_id">VAT / Tax ID (optional)</label>
+    <input id="tax_id" name="tax_id" value="{{ bp.tax_id if bp else '' }}">
+    <label for="address_line1">Address</label>
+    <input id="address_line1" name="address_line1" value="{{ bp.address_line1 if bp else '' }}">
+    <label for="address_line2">Address line 2</label>
+    <input id="address_line2" name="address_line2" value="{{ bp.address_line2 if bp else '' }}">
+    <label for="postal_code">Postal code</label>
+    <input id="postal_code" name="postal_code" value="{{ bp.postal_code if bp else '' }}">
+    <label for="city">City</label>
+    <input id="city" name="city" value="{{ bp.city if bp else '' }}">
+    <label for="state">State / region</label>
+    <input id="state" name="state" value="{{ bp.state if bp else '' }}">
+    <label for="country">Country code (2 letters, e.g. ES)</label>
+    <input id="country" name="country" maxlength="2" value="{{ bp.country if bp else '' }}">
+    <p><button type="submit">Save billing details</button></p>
+  </form>
+
+  <h2>Credit history</h2>
+  {% if history %}
+    <table>
+      <tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance</th><th>Note</th><th></th></tr>
+      {% for tx in history %}
+        <tr>
+          <td>{{ tx.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td>{{ tx.kind }}</td>
+          <td>{{ tx.amount }}</td>
+          <td>{{ tx.balance_after }}</td>
+          <td>{{ tx.description }}</td>
+          <td>
+            {% if tx.kind == 'purchase' %}
+              <a href="/account/billing/receipt/{{ tx.id }}">Receipt</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class="muted">No transactions yet.</p>
+  {% endif %}
+
+  <p><a href="/account">← Back to your account</a></p>
+{% endblock %}

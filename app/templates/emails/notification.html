@@ -1,0 +1,14 @@
+{% extends "emails/base_email.html" %}
+{% block heading %}{{ title }}{% endblock %}
+{% block content %}
+  {% if body %}<p>{{ body }}</p>{% endif %}
+  {% if link %}
+    <p><a href="{{ link }}" style="background:#222;color:#fff;padding:10px 18px;
+          border-radius:4px;text-decoration:none;display:inline-block">View</a></p>
+  {% endif %}
+  {% if unsubscribe_url %}
+    <p style="font-size:12px;color:#777">
+      Don't want these emails? <a href="{{ unsubscribe_url }}">Unsubscribe</a>.
+    </p>
+  {% endif %}
+{% endblock %}

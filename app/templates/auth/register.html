@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Register — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Create an account</h1>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  {% if registration_enabled %}
+    <form action="/register" method="post">
+      {{ csrf_field }}
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" value="{{ email or '' }}" required autofocus>
+      <label for="display_name">Display name (optional)</label>
+      <input id="display_name" name="display_name" type="text">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" minlength="8" required>
+      <p class="muted">At least 8 characters.</p>
+      {% if turnstile_enabled %}
+        <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+      {% endif %}
+      <p><button type="submit">Register</button></p>
+    </form>
+  {% else %}
+    <p class="muted">Registration is currently disabled.</p>
+  {% endif %}
+  {% if any_oauth_enabled %}
+    <h2>Or sign up with</h2>
+    <p>
+      {% for name, enabled in oauth_providers.items() %}
+        {% if enabled %}
+          <a href="/auth/{{ name }}/login">{{ name | capitalize }}</a>
+          {% if not loop.last %}&middot;{% endif %}
+        {% endif %}
+      {% endfor %}
+    </p>
+  {% endif %}
+
+  <p class="muted"><a href="/login">Already have an account? Log in</a></p>
+{% endblock %}

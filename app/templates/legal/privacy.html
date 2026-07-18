@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Privacy Policy</h1>
+  <p class="muted">Last updated: {{ last_updated }}</p>
+
+  <p><strong>Placeholder copy — replace with your real privacy policy before launch.</strong></p>
+
+  <h2>1. Information we collect</h2>
+  <p>Account data (email, display name), authentication data, and usage/billing records needed to run the service.</p>
+
+  <h2>2. How we use it</h2>
+  <p>To provide and secure the service, process payments, and communicate with you about your account.</p>
+
+  <h2>3. Payment data</h2>
+  <p>Card details are handled by our payment processor (e.g. Stripe); we do not store full card numbers.</p>
+
+  <h2>4. Cookies</h2>
+  <p>We use a session cookie to keep you signed in. It is strictly necessary for authentication.</p>
+
+  <h2>5. Data sharing</h2>
+  <p>We share data only with processors required to operate the service (hosting, email, payments).</p>
+
+  <h2>6. Your rights</h2>
+  <p>You may request access to, correction of, or deletion of your personal data by contacting us.</p>
+
+  <h2>7. Retention</h2>
+  <p>We retain data for as long as your account is active or as required for legal/accounting purposes.</p>
+
+  <h2>8. Contact</h2>
+  <p>Privacy questions? <a href="/contact">Contact us</a>.</p>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Email change — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Email change</h1>
+  {% if ok %}
+    <p class="ok">Your email address is now <strong>{{ email }}</strong>.</p>
+  {% else %}
+    <p class="error">That confirmation link is invalid or has expired.</p>
+    <p class="muted">Request a new one from your account page.</p>
+  {% endif %}
+  <p><a href="/account">Back to your account</a></p>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Receipt {{ tx.id[:8] }} — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Receipt</h1>
+  <p class="muted">Print this page (Ctrl+P) and choose “Save as PDF” for your records.</p>
+
+  <div class="card">
+    <p><strong>{{ APP_NAME }}</strong></p>
+    <p><strong>Receipt no.:</strong> {{ tx.id }}</p>
+    <p><strong>Date:</strong> {{ tx.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</p>
+
+    <h2>Billed to</h2>
+    <p>
+      {% if billing_profile and billing_profile.company_name %}
+        {{ billing_profile.company_name }}<br>
+      {% endif %}
+      {{ user.display_name or user.email }}<br>
+      {{ user.email }}<br>
+      {% if billing_profile %}
+        {% if billing_profile.address_line1 %}{{ billing_profile.address_line1 }}<br>{% endif %}
+        {% if billing_profile.address_line2 %}{{ billing_profile.address_line2 }}<br>{% endif %}
+        {% if billing_profile.postal_code or billing_profile.city %}
+          {{ billing_profile.postal_code }} {{ billing_profile.city }}<br>{% endif %}
+        {% if billing_profile.state %}{{ billing_profile.state }}<br>{% endif %}
+        {% if billing_profile.country %}{{ billing_profile.country }}<br>{% endif %}
+        {% if billing_profile.tax_id %}Tax ID: {{ billing_profile.tax_id }}<br>{% endif %}
+      {% endif %}
+    </p>
+
+    <h2>Details</h2>
+    <table>
+      <tr><th>Description</th><th>Type</th><th>Credits</th></tr>
+      <tr>
+        <td>{{ tx.description or 'Credit purchase' }}</td>
+        <td>{{ tx.kind }}</td>
+        <td>{{ tx.amount }}</td>
+      </tr>
+    </table>
+    <p><strong>Balance after:</strong> {{ tx.balance_after }} credits</p>
+    {% if tx.reference_id %}<p class="muted">Reference: {{ tx.reference_id }}</p>{% endif %}
+  </div>
+
+  <p class="muted">Card payments are processed by Stripe; the charge on your statement comes from
+    them. For a VAT invoice with amounts and tax lines, use the
+    <a href="/account/billing">billing portal</a>.</p>
+  <p><a href="/account/billing">← Back to billing</a></p>
+{% endblock %}

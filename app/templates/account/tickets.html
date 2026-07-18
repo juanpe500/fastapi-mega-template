@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Support — {{ APP_NAME }}{% endblock %}
+{% block content %}
+  <h1>Support tickets</h1>
+
+  <h2>Open a new ticket</h2>
+  <form action="/account/tickets" method="post" enctype="multipart/form-data">
+      {{ csrf_field }}
+    <label for="subject">Subject</label>
+    <input id="subject" name="subject" required>
+    <label for="category">Category</label>
+    <select id="category" name="category">
+      <option value="general">General</option>
+      <option value="billing">Billing</option>
+      <option value="bug">Bug</option>
+      <option value="account">Account</option>
+    </select>
+    <label for="body">Message</label>
+    <textarea id="body" name="body" rows="5" required></textarea>
+    <label for="attachment">Attachment (optional)</label>
+    <input id="attachment" name="attachment" type="file">
+    <p><button type="submit">Submit ticket</button></p>
+  </form>
+
+  <h2>Your tickets</h2>
+  {% if tickets %}
+    <table>
+      <tr><th>Subject</th><th>Status</th><th>Last reply</th></tr>
+      {% for t in tickets %}
+        <tr>
+          <td><a href="/account/tickets/{{ t.id }}">{{ t.subject }}</a></td>
+          <td>{{ t.status }}</td>
+          <td>{{ t.last_reply_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class="muted">You have no tickets yet.</p>
+  {% endif %}
+{% endblock %}
