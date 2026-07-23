@@ -52,6 +52,12 @@ class User(UUIDMixin, TimestampMixin, Base):
     deletion_requested_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), default=None, index=True
     )
+    # Set once the account has been irreversibly anonymised. The row is KEPT as a
+    # tombstone (no PII) so legally-retained financial records — invoices, the
+    # credit ledger — keep a valid owner. See account_service.anonymize().
+    purged_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), default=None, index=True
+    )
 
     # --- pending email change (only applied once the NEW address is confirmed) ---
     pending_email: Mapped[str | None] = mapped_column(String(255), default=None)

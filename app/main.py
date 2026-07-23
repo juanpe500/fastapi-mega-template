@@ -18,7 +18,7 @@ from app.config import settings
 from app.database import create_all
 from app.errors import register_error_handlers
 from app.logging_config import logger
-from app.ops import MaintenanceMiddleware, MetricsMiddleware
+from app.ops import MaintenanceMiddleware, MetricsMiddleware, RequestIDMiddleware
 from app.redis_client import close_redis
 from app.scheduler import shutdown_scheduler, start_scheduler
 from app.security.csrf import CSRFMiddleware, csrf_protect
@@ -78,7 +78,11 @@ def create_app() -> FastAPI:
             allow_credentials=True,
             allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
             allow_headers=["*"],
+            expose_headers=["X-Request-ID"],
         )
+    # Outermost: stamp a correlation id before anything else runs, so every log
+    # line and error record for the request carries it.
+    app.add_middleware(RequestIDMiddleware)
 
     # --- static ---
     static_dir = BASE_DIR / "static"
@@ -93,6 +97,7 @@ def create_app() -> FastAPI:
         account,
         auth,
         billing,
+        email_webhook,
         files,
         health,
         notifications,
@@ -111,6 +116,7 @@ def create_app() -> FastAPI:
     app.include_router(account.router)
     app.include_router(tickets.router)
     app.include_router(billing.router)
+    app.include_router(email_webhook.router)
     app.include_router(files.router)
     app.include_router(oauth.router)
     app.include_router(admin_router.router)

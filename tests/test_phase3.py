@@ -98,6 +98,15 @@ def test_metrics_endpoint_exposes_prometheus_text(client, s):
     assert "app_info" in r.text
 
 
+def test_request_id_is_echoed_and_honours_inbound_header(client, s):
+    # Generated when absent.
+    r = s.get("/status")
+    assert r.headers.get("X-Request-ID")
+    # Honoured when a proxy supplies one.
+    r = s.get("/status", headers={"X-Request-ID": "trace-abc-123"})
+    assert r.headers.get("X-Request-ID") == "trace-abc-123"
+
+
 def test_robots_and_sitemap(client, s):
     robots = s.get("/robots.txt")
     assert "Disallow: /admin" in robots.text

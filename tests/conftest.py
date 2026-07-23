@@ -22,6 +22,7 @@ os.environ["SCHEDULER_ENABLED"] = "0"
 os.environ["RATE_LIMIT_ENABLED"] = "0"  # don't throttle the test suite
 os.environ["STORAGE_BACKEND"] = "local"
 os.environ["HIBP_ENABLED"] = "0"  # no network calls from the suite
+os.environ["EMAIL_WEBHOOK_SECRET"] = "test-webhook-secret"
 
 from fastapi.testclient import TestClient  # noqa: E402
 

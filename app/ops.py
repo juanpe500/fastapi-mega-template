@@ -10,12 +10,30 @@ extra dependency needed.
 from __future__ import annotations
 
 import time
+import uuid
 from collections import defaultdict
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 
 from app.config import settings
+from app.logging_config import request_id_var
+
+
+class RequestIDMiddleware(BaseHTTPMiddleware):
+    """Assign every request a correlation id (honouring an inbound X-Request-ID
+    from a proxy), expose it via the contextvar for logs/errors, and echo it back
+    on the response so a client can quote it in a bug report."""
+
+    async def dispatch(self, request: Request, call_next):
+        rid = request.headers.get("X-Request-ID", "").strip()[:64] or uuid.uuid4().hex[:16]
+        token = request_id_var.set(rid)
+        try:
+            response = await call_next(request)
+        finally:
+            request_id_var.reset(token)
+        response.headers["X-Request-ID"] = rid
+        return response
 
 # --- maintenance flag cache -------------------------------------------------
 _flag_value = False

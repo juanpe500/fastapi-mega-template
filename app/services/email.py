@@ -38,6 +38,17 @@ def _send_sync(to: str, subject: str, body: str, html: str | None = None) -> Non
 
 
 async def send_email(to: str, subject: str, body: str, html: str | None = None) -> None:
+    # Skip addresses that hard-bounced or complained. A failed check must never
+    # block a send, so it's best-effort.
+    try:
+        from app.services import suppression
+
+        if await suppression.is_suppressed_email(to):
+            logger.info("[email:suppressed] skipped %s (Subject=%s)", to, subject)
+            return
+    except Exception as exc:  # pragma: no cover
+        logger.warning("Suppression check failed for %s: %s", to, exc)
+
     try:
         await asyncio.to_thread(_send_sync, to, subject, body, html)
     except Exception as exc:  # pragma: no cover — never let email failures 500 a request

@@ -9,6 +9,7 @@ from app.models.oauth import OAuthAccount
 from app.models.rbac import Permission, Role, role_permissions, user_roles
 from app.models.recovery import RecoveryCode
 from app.models.setting import AppSetting
+from app.models.suppression import SuppressedEmail
 from app.models.ticket import Ticket, TicketMessage
 from app.models.user import User, UserSession
 
@@ -34,4 +35,5 @@ __all__ = [
     "AppSetting",
     "Notification",
     "NotificationPreference",
+    "SuppressedEmail",
 ]

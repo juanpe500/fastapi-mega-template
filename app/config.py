@@ -73,6 +73,9 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = ""
     SMTP_STARTTLS: bool = True
     EMAIL_FROM: str = "My App <no-reply@example.com>"
+    # Shared secret your ESP quotes (?token=... or X-Webhook-Token) when POSTing
+    # bounce/complaint events to /webhooks/email. Blank disables the endpoint.
+    EMAIL_WEBHOOK_SECRET: str = ""
 
     # --- Stripe ---
     STRIPE_SECRET_KEY: str = ""

@@ -11,7 +11,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.config import settings
 from app.database import SessionLocal
-from app.logging_config import logger
+from app.logging_config import logger, request_id_var
 from app.security.tokens import decode_token
 from app.templating import render
 
@@ -39,10 +39,25 @@ async def _persist_error(request: Request, exc: Exception, status_code: int) -> 
                 message=str(exc)[:2000],
                 traceback="".join(tb.format_exception(type(exc), exc, exc.__traceback__))[:8000],
                 user_id=user_id,
+                request_id=request_id_var.get(),
             ))
             await db.commit()
     except Exception:  # pragma: no cover — never let logging errors mask the original
         logger.exception("Failed to persist ErrorLog")
+
+
+def _sentry_capture(exc: Exception) -> None:
+    """Report to Sentry explicitly. Our catch-all handler below stops the
+    exception from propagating, so Sentry's automatic capture never fires — we
+    have to send it ourselves."""
+    if not settings.SENTRY_DSN:
+        return
+    try:
+        import sentry_sdk
+
+        sentry_sdk.capture_exception(exc)
+    except Exception:  # pragma: no cover — never let reporting mask the original
+        pass
 
 
 async def _telegram_alert(message: str) -> None:
@@ -83,8 +98,12 @@ def register_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(Exception)
     async def unhandled_handler(request: Request, exc: Exception):
         logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+        _sentry_capture(exc)
         await _persist_error(request, exc, 500)
-        await _telegram_alert(f"[{settings.APP_NAME}] 500 on {request.url.path}: {exc}")
+        await _telegram_alert(
+            f"[{settings.APP_NAME}] 500 on {request.url.path} "
+            f"(req {request_id_var.get()}): {exc}"
+        )
         if _wants_json(request):
             return JSONResponse({"detail": "Internal server error"}, status_code=500)
         return render(request, "errors/500.html", {}, status_code=500)

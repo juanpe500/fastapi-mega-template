@@ -24,6 +24,7 @@ SAFE_METHODS = {"GET", "HEAD", "OPTIONS", "TRACE"}
 # Paths that authenticate by other means and must not require a CSRF token.
 EXEMPT_PREFIXES = (
     "/billing/webhook",  # Stripe (signature-verified, JSON body)
+    "/webhooks/email",   # ESP bounce/complaint (shared-token authenticated)
     "/auth/refresh",     # guarded by the httpOnly refresh cookie
 )
 

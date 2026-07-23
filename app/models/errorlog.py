@@ -13,6 +13,8 @@ class ErrorLog(UUIDMixin, TimestampMixin, Base):
     path: Mapped[str] = mapped_column(String(500), default="")
     method: Mapped[str] = mapped_column(String(10), default="")
     status_code: Mapped[int] = mapped_column(default=500)
+    # Correlation id shared with logs / Sentry for this same request.
+    request_id: Mapped[str] = mapped_column(String(64), default="", index=True)
     message: Mapped[str] = mapped_column(Text, default="")
     traceback: Mapped[str] = mapped_column(Text, default="")
     user_id: Mapped[str | None] = mapped_column(

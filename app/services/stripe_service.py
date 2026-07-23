@@ -16,7 +16,7 @@ from app.config import settings
 from app.logging_config import logger
 from app.models.billing import Plan, StripeEvent, Subscription
 from app.models.user import User
-from app.services import credit_service
+from app.services import credit_service, notifications
 
 try:
     import stripe as _stripe
@@ -138,6 +138,7 @@ async def _dispatch(db: AsyncSession, event: dict) -> None:
         "customer.subscription.updated": _on_subscription_upsert,
         "customer.subscription.deleted": _on_subscription_deleted,
         "invoice.payment_succeeded": _on_invoice_paid,
+        "invoice.payment_failed": _on_invoice_failed,
         "charge.refunded": _on_charge_refunded,
         "charge.dispute.created": _on_dispute_created,
         "charge.dispute.closed": _on_dispute_closed,
@@ -163,6 +164,13 @@ async def _user_by_customer(db: AsyncSession, customer_id: str | None) -> User |
     ).scalar_one_or_none()
 
 
+def _fmt_money(amount_cents: int | None, currency: str | None) -> str:
+    """Stripe amounts are integer minor units; render them as "12.00 USD"."""
+    if amount_cents is None:
+        return ""
+    return f"{amount_cents / 100:,.2f} {(currency or 'usd').upper()}"
+
+
 async def _on_checkout_completed(db: AsyncSession, session: dict) -> None:
     meta = session.get("metadata") or {}
     user = await _user_by_id(db, meta.get("user_id")) or await _user_by_customer(
@@ -184,6 +192,12 @@ async def _on_checkout_completed(db: AsyncSession, session: dict) -> None:
                 kind="purchase",
                 description=f"Purchased {plan.name}",
                 reference_id=session.get("payment_intent") or session.get("id"),
+            )
+            await notifications.notify(
+                db, user, "billing", "Payment received",
+                f"Your purchase of {plan.name} is complete — "
+                f"{plan.credits_granted:,} credits have been added to your account.",
+                link="/account/billing",
             )
     # Subscriptions are reconciled by the customer.subscription.* events.
 
@@ -233,12 +247,53 @@ async def _on_subscription_deleted(db: AsyncSession, sub: dict) -> None:
     if row:
         row.status = "canceled"
         row.cancel_at_period_end = True
+        user = await db.get(User, row.user_id)
+        if user:
+            await notifications.notify(
+                db, user, "billing", "Your subscription was canceled",
+                "Your subscription has ended and will not renew. "
+                "You can resubscribe at any time from your billing page.",
+                link="/account/billing",
+            )
 
 
 async def _on_invoice_paid(db: AsyncSession, invoice: dict) -> None:
-    # Subscription renewal — the subscription.updated event carries the new
-    # period end, so nothing extra is needed here for the base template.
+    # The subscription.updated event carries the new period end, so the only
+    # thing to add here is a receipt notification for subscription invoices.
     logger.info("Invoice paid: %s", invoice.get("id"))
+    reason = invoice.get("billing_reason")
+    titles = {
+        "subscription_create": "Your subscription is active",
+        "subscription_cycle": "Your subscription renewed",
+    }
+    title = titles.get(reason)
+    if not title:  # skip one-off / manual invoices to avoid duplicate notices
+        return
+    user = await _user_by_customer(db, invoice.get("customer"))
+    if not user:
+        return
+    amount = _fmt_money(invoice.get("amount_paid"), invoice.get("currency"))
+    await notifications.notify(
+        db, user, "billing", title,
+        f"We received your payment of {amount}. Thank you!" if amount
+        else "Your payment was received. Thank you!",
+        link="/account/billing",
+    )
+
+
+async def _on_invoice_failed(db: AsyncSession, invoice: dict) -> None:
+    logger.warning("Invoice payment failed: %s", invoice.get("id"))
+    user = await _user_by_customer(db, invoice.get("customer"))
+    if not user:
+        return
+    amount = _fmt_money(invoice.get("amount_due"), invoice.get("currency"))
+    await notifications.notify(
+        db, user, "billing", "Your payment failed",
+        f"We couldn't process your payment{f' of {amount}' if amount else ''}. "
+        "Please update your payment method to keep your subscription active — "
+        "we'll retry automatically.",
+        link="/account/billing",
+    )
 
 
 async def _on_charge_refunded(db: AsyncSession, charge: dict) -> None:
@@ -266,6 +321,13 @@ async def _on_charge_refunded(db: AsyncSession, charge: dict) -> None:
         description="Refund",
         reference_id=pi,
         allow_negative=True,
+    )
+    amount = _fmt_money(charge.get("amount_refunded"), charge.get("currency"))
+    await notifications.notify(
+        db, user, "billing", "Your refund was processed",
+        f"A refund{f' of {amount}' if amount else ''} has been issued to your "
+        "original payment method. It may take a few business days to appear.",
+        link="/account/billing",
     )
 
 
