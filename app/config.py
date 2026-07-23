@@ -140,6 +140,14 @@ class Settings(BaseSettings):
     ANALYTICS_SITE_ID: str = ""
     COOKIE_BANNER_ENABLED: bool = True
 
+    # --- PWA (installable web app) ---
+    PWA_ENABLED: bool = True
+    # short_name shows under the home-screen icon; keep it under ~12 chars.
+    PWA_SHORT_NAME: str = ""
+    PWA_THEME_COLOR: str = "#0d6efd"       # browser UI / status bar tint
+    PWA_BACKGROUND_COLOR: str = "#ffffff"  # splash-screen background
+    PWA_DISPLAY: str = "standalone"        # standalone | minimal-ui | browser
+
     # --- i18n ---
     DEFAULT_LOCALE: str = "en"
     # Comma-separated list of locales with files in app/locales/

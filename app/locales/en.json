@@ -28,5 +28,10 @@
 
   "cookies.message": "We use cookies to keep you signed in and to understand how the site is used.",
   "cookies.accept": "Accept",
-  "cookies.reject": "Reject non-essential"
+  "cookies.reject": "Reject non-essential",
+
+  "offline.title": "Offline",
+  "offline.heading": "You're offline",
+  "offline.message": "We couldn't reach the network. Check your connection and try again.",
+  "offline.retry": "Retry"
 }

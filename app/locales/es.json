@@ -28,5 +28,10 @@
 
   "cookies.message": "Usamos cookies para mantener tu sesión y entender cómo se usa el sitio.",
   "cookies.accept": "Aceptar",
-  "cookies.reject": "Rechazar no esenciales"
+  "cookies.reject": "Rechazar no esenciales",
+
+  "offline.title": "Sin conexión",
+  "offline.heading": "Estás sin conexión",
+  "offline.message": "No pudimos conectar con la red. Revisa tu conexión e inténtalo de nuevo.",
+  "offline.retry": "Reintentar"
 }

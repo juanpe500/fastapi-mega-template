@@ -43,6 +43,7 @@ _FLAG_TTL = 10.0  # seconds
 # Reachable even during maintenance, so you can log in and switch it off.
 _ALLOWED_PREFIXES = (
     "/health", "/metrics", "/status", "/static", "/login", "/logout", "/admin", "/favicon",
+    "/sw.js", "/manifest.webmanifest", "/offline",
 )
 
 

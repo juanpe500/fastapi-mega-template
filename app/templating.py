@@ -32,6 +32,10 @@ templates.env.globals.update(
     # SEO defaults (override per page with the `meta_*` context keys)
     SITE_DESCRIPTION=settings.SITE_DESCRIPTION,
     SITE_IMAGE=settings.SITE_IMAGE,
+    # PWA
+    pwa_enabled=settings.PWA_ENABLED,
+    pwa_short_name=settings.PWA_SHORT_NAME or settings.APP_NAME,
+    pwa_theme_color=settings.PWA_THEME_COLOR,
     # Consent / analytics
     cookie_banner_enabled=settings.COOKIE_BANNER_ENABLED,
     analytics_enabled=settings.analytics_enabled,

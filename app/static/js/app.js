@@ -52,6 +52,16 @@
     });
   }
 
+  // --- PWA service worker ---------------------------------------------------
+  // Register only when the page advertises a manifest (i.e. PWA is enabled).
+  if ("serviceWorker" in navigator && document.querySelector('link[rel="manifest"]')) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/sw.js").catch(function () {
+        /* SW is a progressive enhancement; ignore registration failures */
+      });
+    });
+  }
+
   // --- unread notification badge -------------------------------------------
   const link = document.getElementById("notif-link");
   if (link) {

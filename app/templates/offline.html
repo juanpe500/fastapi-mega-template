@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ t("offline.title") }} · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<section class="card" style="text-align:center">
+  <h1>{{ t("offline.heading") }}</h1>
+  <p>{{ t("offline.message") }}</p>
+  <p><button onclick="location.reload()">{{ t("offline.retry") }}</button></p>
+</section>
+{% endblock %}

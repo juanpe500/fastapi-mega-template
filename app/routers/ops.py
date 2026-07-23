@@ -1,8 +1,11 @@
-"""Public ops & SEO endpoints: status page, metrics, sitemap, robots, locale switch."""
+"""Public ops & SEO endpoints: status page, metrics, sitemap, robots, locale switch,
+plus the PWA manifest + service worker."""
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.responses import PlainTextResponse, RedirectResponse, Response
+from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse, Response
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +20,8 @@ router = APIRouter(tags=["ops"])
 
 # Pages listed in sitemap.xml. Add your own public routes here.
 PUBLIC_PATHS = ["/", "/terms", "/privacy", "/refunds", "/contact", "/login", "/register"]
+
+_SW_PATH = Path(__file__).resolve().parent.parent / "static" / "js" / "sw.js"
 
 
 @router.get("/status")
@@ -82,6 +87,55 @@ async def sitemap() -> Response:
         f"{urls}</urlset>"
     )
     return Response(content=xml, media_type="application/xml")
+
+
+@router.get("/manifest.webmanifest")
+async def manifest() -> Response:
+    """Web app manifest — makes the site installable to the home screen."""
+    if not settings.PWA_ENABLED:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    icons = [
+        {"src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png",
+         "purpose": "any"},
+        {"src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png",
+         "purpose": "any"},
+        {"src": "/static/icons/icon-maskable-512.png", "sizes": "512x512",
+         "type": "image/png", "purpose": "maskable"},
+        {"src": "/static/icons/icon.svg", "sizes": "any", "type": "image/svg+xml"},
+    ]
+    data = {
+        "name": settings.APP_NAME,
+        "short_name": settings.PWA_SHORT_NAME or settings.APP_NAME,
+        "description": settings.SITE_DESCRIPTION or settings.APP_NAME,
+        "start_url": "/?utm_source=pwa",
+        "scope": "/",
+        "display": settings.PWA_DISPLAY,
+        "theme_color": settings.PWA_THEME_COLOR,
+        "background_color": settings.PWA_BACKGROUND_COLOR,
+        "icons": icons,
+    }
+    return JSONResponse(data, media_type="application/manifest+json")
+
+
+@router.get("/sw.js")
+async def service_worker() -> Response:
+    """Serve the service worker from the root so its scope covers the whole site."""
+    if not settings.PWA_ENABLED:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    js = _SW_PATH.read_text(encoding="utf-8").replace(
+        "__CACHE_VERSION__", str(settings.DEPLOY_VERSION)
+    )
+    return Response(
+        content=js,
+        media_type="text/javascript",
+        headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"},
+    )
+
+
+@router.get("/offline")
+async def offline(request: Request, user=Depends(get_current_user_optional)) -> Response:
+    """Shown by the service worker when a navigation happens with no network."""
+    return render(request, "offline.html", {}, user=user)
 
 
 @router.get("/locale/{code}")

@@ -22,6 +22,19 @@
 
   <link rel="stylesheet" href="/static/css/app.css?v={{ deploy_version }}">
 
+  {# --- icons + PWA --- #}
+  <link rel="icon" href="/static/icons/favicon-32.png" sizes="32x32">
+  <link rel="icon" href="/static/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+  {% if pwa_enabled %}
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="{{ pwa_theme_color }}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="{{ pwa_short_name }}">
+  {% endif %}
+
   {# Analytics load only after consent — see the cookie banner below. #}
   {% if analytics_enabled and cookies_accepted %}
     <script defer src="{{ analytics_script_url }}"
