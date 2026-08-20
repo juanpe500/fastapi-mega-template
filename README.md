@@ -1,7 +1,26 @@
+<div align="center">
+
 # FastAPI Mega-Template
 
-A batteries-included FastAPI starter so you never rebuild the boring 70% again.
+<b>A batteries-included FastAPI starter so you never rebuild the boring 70% again.</b><br>
 Distilled from many production apps — the best pattern from each.
+
+<p>
+  <a href="https://github.com/juanpe500/fastapi-mega-template/actions/workflows/ci.yml"><img src="https://github.com/juanpe500/fastapi-mega-template/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/FastAPI-async-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/Python-3.11+-3776ab?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+">
+  <img src="https://img.shields.io/badge/SQLAlchemy-2.0_async-0891b2?style=flat-square" alt="SQLAlchemy 2.0">
+  <img src="https://img.shields.io/badge/tests-22_passing-3fb950?style=flat-square" alt="22 tests">
+  <img src="https://img.shields.io/badge/batteries-70+_features-7c8cff?style=flat-square" alt="70+ features">
+</p>
+
+<img src="assets/architecture.png" alt="FastAPI Mega-Template request lifecycle: client through security middleware, edge (CSP/CSRF, rate limit), APIRouter, auth (JWT/session/API key/2FA, RBAC), services (Stripe, storage, email) and data (SQLAlchemy, Redis)" width="100%">
+
+</div>
+
+Every request flows through the same clean spine: **security middleware → router → auth & RBAC →
+service layer → data**, with Stripe, object storage, email, Redis and a background scheduler wired in
+around it. The pieces above are real modules in `app/`, already connected and tested.
 
 ## What's included
 
@@ -47,6 +66,18 @@ Distilled from many production apps — the best pattern from each.
 - **SEO** — OpenGraph/Twitter cards, canonical URLs, `robots.txt`, `sitemap.xml`
 - **Soft delete** — tickets go to `/admin/tickets/trash` and can be restored
 - **Referrals** — every user gets a share link (`/?ref=CODE`), attributed at signup with an optional credit bonus
+
+---
+
+<div align="center">
+
+<img src="assets/pages.png" alt="The template's real login page running, unstyled — every route works out of the box behind 20 lines of CSS" width="100%">
+
+</div>
+
+Every page is **server-rendered and working** — the screenshot above is the real `/login`. The template
+ships with a deliberately tiny **20-line stylesheet** so nothing fights your design: the markup, forms,
+CSRF, flash messages and flows are done, and the look is entirely yours.
 
 ## Quick start
 
